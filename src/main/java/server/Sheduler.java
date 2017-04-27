@@ -79,6 +79,8 @@ public class Sheduler implements Runnable {
                 nextTx.getChannel().writeAndFlush(reply);
                 System.out.println("Done "+nextTx.getCommitTS());
 
+                transactionMap.remove(nextTx.getCommitTS());
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
