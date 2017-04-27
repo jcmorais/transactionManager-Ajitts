@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 public class Run {
     public static void main(String[] args) throws InterruptedException {
 
-        ExecutorService executor = Executors.newFixedThreadPool(20);
+        ExecutorService executor = Executors.newFixedThreadPool(100);
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 100; i++) {
             executor.submit(new Client());
         }
 

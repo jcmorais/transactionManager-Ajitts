@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -26,7 +27,7 @@ public class Sheduler implements Runnable {
     public Sheduler() {
         this.queue = new LinkedBlockingDeque<>();
         this.timestamp = new TimestampImpl();
-        this.transactionMap = new HashMap<>();
+        this.transactionMap = new ConcurrentHashMap<>();
     }
 
 
