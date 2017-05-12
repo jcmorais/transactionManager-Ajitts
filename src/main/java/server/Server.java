@@ -10,6 +10,9 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+
 /**
  * Created by carlosmorais on 12/04/2017.
  */
@@ -28,7 +31,7 @@ public class Server {
             sslCtx = null;
         }
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup(2);
+        EventLoopGroup bossGroup = new NioEventLoopGroup(4);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -38,6 +41,9 @@ public class Server {
                     .childHandler(new ServerInitializer(sslCtx, new TimestampImpl()));
 
             b.bind(PORT).sync().channel().closeFuture().sync();
+            //b.bind("0.0.0.0", 655).channel().closeFuture().sync();
+
+            System.out.println(b.toString());
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

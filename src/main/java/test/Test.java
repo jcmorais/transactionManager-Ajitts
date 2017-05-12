@@ -1,16 +1,14 @@
 package test;
 
-import client.TransactionAjitts;
-import client.TransactionManagerAjitts;
-import client.TransactionManagerAjittsImpl;
-
 /**
  * Created by carlosmorais on 20/04/2017.
  */
 public class Test {
     public static void main(String[] args) throws InterruptedException {
+        /*
 
-        TransactionManagerAjitts tm = new TransactionManagerAjittsImpl();
+
+        HBaseTransactionManager tm = new HBaseTransactionManager();
 
         TransactionAjitts t = tm.begin();
 
@@ -21,7 +19,6 @@ public class Test {
 
         System.exit(0);
 
-        /*
         Queue<TransactionAjitts> queue = new LinkedList();
 
         BlockingDeque<TransactionAjitts> quee = new LinkedBlockingDeque<>();

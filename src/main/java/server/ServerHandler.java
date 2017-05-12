@@ -26,7 +26,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<MessageEvent> {
             sheduler.startTransaction((BeginRequest) msg, ctx.channel());
         }
         else if( msg instanceof CommitRequest){
-            System.out.println(msg);
             sheduler.commitTransaction((CommitRequest) msg);
         }
     }

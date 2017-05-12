@@ -1,1 +1,1 @@
-# transactionManager-Ajitts
+# HBaseTransactionManager-Ajitts

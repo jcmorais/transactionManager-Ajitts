@@ -1,8 +1,8 @@
 package server;
 
 import io.netty.channel.Channel;
-import messages.BeginReply;
 
+import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Transaction implements Runnable{
     private long commitTS;
-    private long beginTS;
+    private long startTS;
     private boolean commitRequest;
     ReentrantLock lock;
     private Condition condition;
@@ -20,6 +20,9 @@ public class Transaction implements Runnable{
     private Channel channel;
 
     private String eventId;
+
+
+    private List<Long> cellsId;
 
 
 
@@ -31,6 +34,14 @@ public class Transaction implements Runnable{
         this.condition = lock.newCondition();
     }
 
+
+    public List<Long> getCellsId() {
+        return cellsId;
+    }
+
+    public void setCellsId(List<Long> cellsId) {
+        this.cellsId = cellsId;
+    }
 
     public void waitForCommitRequest(){
         lock.lock();
@@ -49,11 +60,12 @@ public class Transaction implements Runnable{
     }
 
 
-    public void setCommitRequest(String eventId) {
+    public void setCommitRequest(String eventId, List<Long> cells) {
         lock.lock();
         try {
             commitRequest = true;
             this.eventId = eventId;
+            this.cellsId = cells;
             condition.signalAll();
         }
         finally {
@@ -70,12 +82,12 @@ public class Transaction implements Runnable{
     }
 
 
-    public long getBeginTS() {
-        return beginTS;
+    public long getStartTS() {
+        return startTS;
     }
 
-    public void setBeginTS(long beginTS) {
-        this.beginTS = beginTS;
+    public void setStartTS(long startTS) {
+        this.startTS = startTS;
     }
 
 
@@ -102,15 +114,19 @@ public class Transaction implements Runnable{
         return (int) (commitTS ^ (commitTS >>> 32));
     }
 
+
     @Override
     public String toString() {
-        return "TransactionAjitts{" +
+        return "Transaction{" +
                 "commitTS=" + commitTS +
-                ", beginTS=" + beginTS +
+                ", startTS=" + startTS +
                 ", commitRequest=" + commitRequest +
                 ", lock=" + lock +
+                ", condition=" + condition +
                 ", sheduler=" + sheduler +
                 ", channel=" + channel +
+                ", eventId='" + eventId + '\'' +
+                ", cellsId=" + cellsId +
                 '}';
     }
 

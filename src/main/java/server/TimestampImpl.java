@@ -5,19 +5,14 @@ package server;
  */
 public class  TimestampImpl implements Timestamp{
 
-    private long lastTimestamp;
-
-    private long beginTimestamp;
+    private long startTimestamp;
     private long commitTimestamp;
 
 
-
     public TimestampImpl() {
-        this.lastTimestamp = 0;
-        this.beginTimestamp = 0;
+        this.startTimestamp = 0;
         this.commitTimestamp = 0;
     }
-
 
 
     public synchronized long nextCommitTS() {
@@ -25,31 +20,27 @@ public class  TimestampImpl implements Timestamp{
         return commitTimestamp;
     }
 
-    public synchronized long nextBeginTS() {
-        beginTimestamp++;
-        return beginTimestamp;
+    public synchronized long nextStartTS() {
+        startTimestamp++;
+        return startTimestamp;
     }
 
-
-    public long getBeginTimestamp() {
-        return beginTimestamp;
+    public synchronized void updateStartTS(long commitTS){
+        startTimestamp = commitTS;
     }
 
-    public long getCommitTimestamp() {
+    public long getStartTS() {
+        return startTimestamp;
+    }
+
+    public long getCommitTS() {
         return commitTimestamp;
-    }
-
-    @Deprecated
-    public synchronized long next() {
-        lastTimestamp++;
-        return  lastTimestamp;
     }
 
     @Override
     public String toString() {
         return "TimestampImpl{" +
-                "lastTimestamp=" + lastTimestamp +
-                ", beginTimestamp=" + beginTimestamp +
+                "startTimestamp=" + startTimestamp +
                 ", commitTimestamp=" + commitTimestamp +
                 '}';
     }

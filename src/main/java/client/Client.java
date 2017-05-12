@@ -51,14 +51,16 @@ public class Client implements Runnable{
 
 
             // Print out the answer.
+            /*
             for (int i = 0; i < 200; i++) {
                 BeginReply reply = handler.sendRequest();
                 System.out.println(reply);
                 Random r = new Random();
                 //Simulate the client work
                 Thread.sleep(r.nextInt(200));
-                System.out.println(handler.sendCommitRequest(reply.getCommitTimestamp()));
+                System.out.println(handler.sendCommitRequest(reply.getCommitTimestamp(), cells));
             }
+            */
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {

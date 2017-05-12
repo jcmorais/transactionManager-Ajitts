@@ -1,17 +1,11 @@
 package client;
 
+import hbase.CellId;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.concurrent.DefaultPromise;
-import io.netty.util.concurrent.Promise;
 import messages.*;
 
-import java.nio.BufferOverflowException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -79,9 +73,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<MessageEvent> {
         this.ctx = ctx;
     }
 
-    public CommitReply sendCommitRequest(long commitTimestamp) {
+    public CommitReply sendCommitRequest(long commitTimestamp, Set<? extends CellId> cells) {
 
-        CommitRequest req = new CommitRequest(commitTimestamp);
+        CommitRequest req = new CommitRequest(commitTimestamp, cells);
         return (CommitReply) sendEvent(req);
 
         /*
