@@ -18,8 +18,6 @@ public class CommitRequest implements Serializable, MessageEvent {
         this.id = id;
         this.eventId = UUID.randomUUID().toString();
         for (CellId cell : cells) {
-            System.out.println(cell);
-            System.out.println(cell.getCellId());
             cellId.add(cell.getCellId());
         }
     }

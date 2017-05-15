@@ -57,7 +57,7 @@ public class Sheduler implements Runnable {
         BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId());
         channel.writeAndFlush(reply);
 
-        LOG.info("Start a new transaction startTS={} commitTS={}", t.getStartTS(), t.getCommitTS());
+        LOG.debug("Start a new transaction startTS={} commitTS={}", t.getStartTS(), t.getCommitTS());
     }
 
     public void commitTransaction(CommitRequest event){
@@ -68,7 +68,7 @@ public class Sheduler implements Runnable {
 
 
     private boolean checkConflicts(Transaction tx) {
-        LOG.info("check conflict in transaction {}",tx.toString());
+        LOG.debug("check conflict in transaction {}",tx.toString());
         boolean txCanCommit=true;
         long startTimestamp = tx.getStartTS();
         Iterable<Long> writeSet = tx.getCellsId();
@@ -103,7 +103,7 @@ public class Sheduler implements Runnable {
         while (true){
             try {
                 nextTx = queue.take();
-                LOG.info("Take (st={},cm={})",nextTx.getStartTS(), nextTx.getCommitTS());
+                LOG.debug("Take (st={},cm={})",nextTx.getStartTS(), nextTx.getCommitTS());
                 nextTx.waitForCommitRequest();
 
                 //Deteção de conflitos
@@ -114,7 +114,7 @@ public class Sheduler implements Runnable {
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());
 
                 nextTx.getChannel().writeAndFlush(reply);
-                LOG.info("Done {}", nextTx.getCommitTS());
+                LOG.debug("Done {}", nextTx.getCommitTS());
 
                 transactionMap.remove(nextTx.getCommitTS());
             } catch (InterruptedException e) {

@@ -71,7 +71,6 @@ class CommitHashMap {
     }
 
     public long putLatestWriteForCell(long hash, long commitTimestamp) {
-        LOG.info("putLatestWriteForCell has={} commitTS={}", hash, commitTimestamp);
         return cellIdToCommitMap.set(hash, commitTimestamp);
     }
 }
