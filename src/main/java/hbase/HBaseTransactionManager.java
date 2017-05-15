@@ -30,7 +30,21 @@ public class HBaseTransactionManager {
         HBaseTransaction tx = (HBaseTransaction) t;
         if(tmClient.commit(t.getTransactionId(), tx.getWriteSet()))
             return;
-        else
+        else{
+            rollback(t);
             throw new RollbackException("conflicts detected in transaction writeset");
+        }
+    }
+
+
+    public final void rollback(Transaction transaction)  {
+
+        HBaseTransaction tx = (HBaseTransaction) transaction;
+
+        tx.setStatus(Transaction.Status.ROLLEDBACK);
+
+        //rollback the transaction
+        tx.cleanup();
+
     }
 }

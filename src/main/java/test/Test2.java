@@ -29,8 +29,8 @@ public class Test2 {
 
         TTable t = new TTable("MY_TEST");
 
-        Put put = new Put(Bytes.toBytes("123456789"));
-        put.add(family, qualifier1, Bytes.toBytes(55555));
+        Put put = new Put(Bytes.toBytes("qwerty"));
+        put.add(family, qualifier1, Bytes.toBytes(10));
 
         t.put(tx, put);
 
@@ -38,8 +38,8 @@ public class Test2 {
 
         TTable t2 = new TTable("MY_TEST");
 
-        Put put2 = new Put(Bytes.toBytes("123456789"));
-        put2.add(family, qualifier1, Bytes.toBytes(55555));
+        Put put2 = new Put(Bytes.toBytes("qwerty"));
+        put2.add(family, qualifier1, Bytes.toBytes(11));
 
         t2.put(tx2, put2);
 
