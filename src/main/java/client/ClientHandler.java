@@ -36,17 +36,20 @@ public class ClientHandler extends SimpleChannelInboundHandler<MessageEvent> {
     public MessageEvent sendEvent(MessageEvent e){
         final ResponseFuture responseFuture = new ResponseFuture();
 
+        if (e instanceof RollbackDone)
+            ctx.writeAndFlush(e);
+        else {
+            responses.put(e.getEventId(), responseFuture);
 
-        responses.put(e.getEventId(), responseFuture);
+            ctx.writeAndFlush(e);
 
-        ctx.writeAndFlush(e);
-
-        try {
-            return responseFuture.get();
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        } catch (ExecutionException e1) {
-            e1.printStackTrace();
+            try {
+                return responseFuture.get();
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            } catch (ExecutionException e1) {
+                e1.printStackTrace();
+            }
         }
 
         return  null;
@@ -89,5 +92,12 @@ public class ClientHandler extends SimpleChannelInboundHandler<MessageEvent> {
         return null;
         */
 
+    }
+
+    public void sendRollbackDone(long transactionId) {
+        RollbackDone msg = new RollbackDone();
+        msg.setTransactionId(transactionId);
+        sendEvent(msg);
+        System.out.println("send rollbackDone"+msg);
     }
 }

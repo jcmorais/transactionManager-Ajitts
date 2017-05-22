@@ -1,10 +1,7 @@
 package server;
 
 import io.netty.channel.Channel;
-import messages.BeginReply;
-import messages.BeginRequest;
-import messages.CommitReply;
-import messages.CommitRequest;
+import messages.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +63,12 @@ public class Sheduler implements Runnable {
         transactionMap.get(event.getId()).setCommitRequest(event.getEventId(), event.getCellId());
     }
 
+    public void rollbackDone(RollbackDone event){
+        //Mark the transaction as ready to commit
+        //Scheduler is responsible for responding to the client with the result
+        transactionMap.get(event.getTransactionId()).setRollback();
+    }
+
 
     private boolean checkConflicts(Transaction tx) {
         LOG.debug("check conflict in transaction {}",tx.toString());
@@ -114,6 +117,13 @@ public class Sheduler implements Runnable {
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());
 
                 nextTx.getChannel().writeAndFlush(reply);
+
+                //if abort wait for client rollback
+                if (!commit) {
+                    LOG.debug("wait for client rollback, tx={}",nextTx.getCommitTS());
+                    nextTx.waitForRollbackDone();
+                }
+
                 LOG.debug("Done {}", nextTx.getCommitTS());
 
                 transactionMap.remove(nextTx.getCommitTS());

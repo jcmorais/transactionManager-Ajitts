@@ -2,10 +2,7 @@ package server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import messages.CommitRequest;
-import messages.MessageEvent;
-import messages.BeginReply;
-import messages.BeginRequest;
+import messages.*;
 
 import java.util.Random;
 
@@ -27,6 +24,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<MessageEvent> {
         }
         else if( msg instanceof CommitRequest){
             sheduler.commitTransaction((CommitRequest) msg);
+        }
+        else if(msg instanceof RollbackDone) {
+            sheduler.rollbackDone((RollbackDone) msg);
         }
     }
 }

@@ -46,5 +46,8 @@ public class HBaseTransactionManager {
         //rollback the transaction
         tx.cleanup();
 
+        //send confirmation to client
+        tmClient.rollbackDone(transaction.getTransactionId());
+
     }
 }

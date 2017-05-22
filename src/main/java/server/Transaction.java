@@ -12,9 +12,14 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Transaction implements Runnable{
     private long commitTS;
     private long startTS;
+
     private boolean commitRequest;
     ReentrantLock lock;
     private Condition condition;
+
+    private boolean rollbackDone;
+    ReentrantLock lockRollback;
+    private Condition conditionRollback;
 
     private Sheduler sheduler;
     private Channel channel;
@@ -32,6 +37,10 @@ public class Transaction implements Runnable{
         this.channel = channel;
         this.lock = new ReentrantLock();
         this.condition = lock.newCondition();
+
+        this.rollbackDone = false;
+        this.lockRollback = new ReentrantLock();
+        this.conditionRollback = lockRollback.newCondition();
     }
 
 
@@ -59,6 +68,22 @@ public class Transaction implements Runnable{
         }
     }
 
+    public void waitForRollbackDone(){
+        lockRollback.lock();
+        try {
+            while (!rollbackDone) {
+                try {
+                    conditionRollback.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        finally {
+            lockRollback.unlock();
+        }
+    }
+
 
     public void setCommitRequest(String eventId, List<Long> cells) {
         lock.lock();
@@ -70,6 +95,17 @@ public class Transaction implements Runnable{
         }
         finally {
             lock.unlock();
+        }
+    }
+
+    public void setRollback() {
+        lockRollback.lock();
+        try {
+            rollbackDone = true;
+            conditionRollback.signalAll();
+        }
+        finally {
+            lockRollback.unlock();
         }
     }
 

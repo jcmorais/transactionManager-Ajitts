@@ -58,5 +58,7 @@ public class Test2 {
         }
 
 
+        System.exit(0);
+
     }
 }
