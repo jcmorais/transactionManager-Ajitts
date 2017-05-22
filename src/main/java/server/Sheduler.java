@@ -111,7 +111,6 @@ public class Sheduler implements Runnable {
 
                 //Deteção de conflitos
                 boolean commit = checkConflicts(nextTx);
-                timestamp.updateStartTS(nextTx.getCommitTS());
 
                 //reply to the Client
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());
@@ -123,6 +122,8 @@ public class Sheduler implements Runnable {
                     LOG.debug("wait for client rollback, tx={}",nextTx.getCommitTS());
                     nextTx.waitForRollbackDone();
                 }
+
+                timestamp.updateStartTS(nextTx.getCommitTS());
 
                 LOG.debug("Done {}", nextTx.getCommitTS());
 

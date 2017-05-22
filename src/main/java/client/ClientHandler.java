@@ -98,6 +98,5 @@ public class ClientHandler extends SimpleChannelInboundHandler<MessageEvent> {
         RollbackDone msg = new RollbackDone();
         msg.setTransactionId(transactionId);
         sendEvent(msg);
-        System.out.println("send rollbackDone"+msg);
     }
 }
