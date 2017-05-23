@@ -40,10 +40,10 @@ public class HBaseTransactionManager {
     }
 
 
-    public final void rollback(Transaction transaction)  {
+    public final void rollback(Transaction transaction) throws IOException {
 
         HBaseTransaction tx = (HBaseTransaction) transaction;
-
+        tx.flushTables();
         tx.setStatus(Transaction.Status.ROLLEDBACK);
 
         //rollback the transaction
