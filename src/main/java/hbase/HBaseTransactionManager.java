@@ -3,6 +3,7 @@ package hbase;
 import client.TmClient;
 import messages.BeginReply;
 
+import java.io.IOException;
 import java.util.HashSet;
 
 /**
@@ -26,8 +27,10 @@ public class HBaseTransactionManager {
         return t;
     }
 
-    public void commit(Transaction t) throws RollbackException {
+    public void commit(Transaction t) throws RollbackException, IOException {
         HBaseTransaction tx = (HBaseTransaction) t;
+        tx.flushTables();
+
         if(tmClient.commit(t.getTransactionId(), tx.getWriteSet()))
             return;
         else{
@@ -37,10 +40,10 @@ public class HBaseTransactionManager {
     }
 
 
-    public final void rollback(Transaction transaction)  {
+    public final void rollback(Transaction transaction) throws IOException {
 
         HBaseTransaction tx = (HBaseTransaction) transaction;
-
+        tx.flushTables();
         tx.setStatus(Transaction.Status.ROLLEDBACK);
 
         //rollback the transaction
