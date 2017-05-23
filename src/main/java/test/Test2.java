@@ -4,6 +4,7 @@ import hbase.HBaseTransactionManager;
 import hbase.RollbackException;
 import hbase.TTable;
 import hbase.Transaction;
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -57,6 +58,27 @@ public class Test2 {
             System.out.println("Abort: "+e.getMessage());
         }
 
+
+
+        Transaction tx3 = tm.begin();
+        Get get = new Get(Bytes.toBytes("qwerty"));
+        get.addColumn(family, qualifier1);
+        System.out.println(t.get(tx3, get));
+
+        try {
+            tm.commit(tx3);
+        } catch (RollbackException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+
+
+        System.exit(0);
 
     }
 }

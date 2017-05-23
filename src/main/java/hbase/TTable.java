@@ -10,6 +10,9 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.io.TimeRange;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import server.Sheduler;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -20,6 +23,7 @@ import java.util.*;
  */
 public class TTable implements Closeable {
     private HTableInterface table;
+    private static final Logger LOG = LoggerFactory.getLogger(Sheduler.class);
 
 
     public TTable(Configuration conf, byte[] tableName) throws IOException {
@@ -42,6 +46,60 @@ public class TTable implements Closeable {
     @Override
     public void close() throws IOException {
         table.close();
+    }
+
+    public Result get(Transaction tx, final Get get) throws IOException {
+
+
+        HBaseTransaction transaction = (HBaseTransaction) tx;
+
+        final long readTimestamp = transaction.getStartTimestamp();
+        final Get tsget = new Get(get.getRow()).setFilter(get.getFilter());
+        TimeRange timeRange = get.getTimeRange();
+        long startTime = timeRange.getMin();
+        long endTime = Math.min(timeRange.getMax(), readTimestamp + 1);
+        tsget.setTimeRange(startTime, endTime).setMaxVersions(1);
+
+
+        Map<byte[], NavigableSet<byte[]>> kvs = get.getFamilyMap();
+        for (Map.Entry<byte[], NavigableSet<byte[]>> entry : kvs.entrySet()) {
+            byte[] family = entry.getKey();
+            NavigableSet<byte[]> qualifiers = entry.getValue();
+            if (qualifiers == null || qualifiers.isEmpty()) {
+                tsget.addFamily(family);
+            } else {
+                for (byte[] qualifier : qualifiers) {
+                    tsget.addColumn(family, qualifier);
+                }
+            }
+        }
+        LOG.info("Initial Get = {}", tsget);
+
+        // Return the KVs that belong to the transaction snapshot, ask for more
+        // versions if needed
+        Result result = table.get(tsget);
+        List<Cell> filteredKeyValues = Collections.emptyList();
+        if (!result.isEmpty()) {
+            filteredKeyValues = filterCellsForSnapshot(result.listCells(), transaction, tsget.getMaxVersions());
+        }
+
+        return Result.create(filteredKeyValues);
+    }
+
+    List<Cell> filterCellsForSnapshot(List<Cell> rawCells, HBaseTransaction transaction, int versionsToRequest){
+
+        assert (rawCells != null && transaction != null && versionsToRequest >= 1);
+
+        Set<Long> aborts = transaction.getAbortedTransactions();
+
+        for (Cell rawCell : rawCells) {
+            if ( aborts.contains(rawCell.getTimestamp() ) ){
+                LOG.info("Found a shitt cell, tx={} ", rawCell.getTimestamp());
+            }
+        }
+
+        return rawCells;
+
     }
 
 
@@ -159,10 +217,6 @@ public class TTable implements Closeable {
     }
 
 
-
-    public Result get(Transaction t, final Get get) throws IOException {
-        return table.get(get);
-    }
 
      /*
 

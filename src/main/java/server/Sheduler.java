@@ -8,7 +8,9 @@ import messages.CommitRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -25,6 +27,8 @@ public class Sheduler implements Runnable {
 
     Map<Long, Transaction> transactionMap;
 
+    Set<Long> abortedTransactions; // Transactions that were aborted, but the rollback has not yet been confirmed
+
     private final CommitHashMap hashmap;
 
 
@@ -33,7 +37,10 @@ public class Sheduler implements Runnable {
         this.timestamp = new TimestampImpl();
         this.transactionMap = new ConcurrentHashMap<>();
         this.hashmap = new CommitHashMap(10000000);
+        this.abortedTransactions = new HashSet<>();
     }
+
+
 
 
     public void startTransaction(BeginRequest event, Channel channel){
@@ -54,7 +61,7 @@ public class Sheduler implements Runnable {
         }
         */
         t.setStartTS(timestamp.getStartTS());
-        BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId());
+        BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId(), abortedTransactions);
         channel.writeAndFlush(reply);
 
         LOG.debug("Start a new transaction startTS={} commitTS={}", t.getStartTS(), t.getCommitTS());
@@ -109,6 +116,9 @@ public class Sheduler implements Runnable {
                 //Deteção de conflitos
                 boolean commit = checkConflicts(nextTx);
                 timestamp.updateStartTS(nextTx.getCommitTS());
+
+                if (!commit)
+                    abortedTransactions.add(nextTx.getCommitTS());
 
                 //reply to the Client
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());

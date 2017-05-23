@@ -29,8 +29,9 @@ import java.util.Set;
 public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
     private static final Logger LOG = LoggerFactory.getLogger(HBaseTransaction.class);
 
-    HBaseTransaction(long startTS, long commitTS, Set<HBaseCellId> writeSet, HBaseTransactionManager tm) {
-        super(startTS, commitTS, writeSet, tm);
+    HBaseTransaction(long startTS, long commitTS, Set<HBaseCellId> writeSet, HBaseTransactionManager tm,
+                     Set<Long> abortedTransactions) {
+        super(startTS, commitTS, writeSet, tm, abortedTransactions);
     }
 
     @Override

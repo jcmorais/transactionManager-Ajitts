@@ -33,6 +33,8 @@ public abstract class AbstractTransaction<T extends CellId> implements Transacti
     private final Set<T> writeSet;
     private Status status = Status.RUNNING;
 
+    private Set<Long> abortedTransactions;
+
     /**
      * Base constructor
      *
@@ -49,11 +51,13 @@ public abstract class AbstractTransaction<T extends CellId> implements Transacti
     public AbstractTransaction(long startTimestamp,
                                long commitTimestamp,
                                Set<T> writeSet,
-                               HBaseTransactionManager HBaseTransactionManager) {
+                               HBaseTransactionManager HBaseTransactionManager,
+                               Set<Long> abortedTransactions) {
         this.startTimestamp = startTimestamp;
         this.commitTimestamp = commitTimestamp;
         this.writeSet = writeSet;
         this.transactionManager = HBaseTransactionManager;
+        this.abortedTransactions = abortedTransactions;
     }
 
     /**
@@ -62,12 +66,18 @@ public abstract class AbstractTransaction<T extends CellId> implements Transacti
     public abstract void cleanup();
 
 
+
+
     /**
      * In AJITTS the transaction id is the commitTimestamp (in omid is the startTimestamp)
      */
     @Override
     public long getTransactionId() {
         return commitTimestamp;
+    }
+
+    public Set<Long> getAbortedTransactions() {
+        return abortedTransactions;
     }
 
     @Override

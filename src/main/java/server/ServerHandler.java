@@ -2,10 +2,7 @@ package server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import messages.CommitRequest;
-import messages.MessageEvent;
-import messages.BeginReply;
-import messages.BeginRequest;
+import messages.*;
 
 import java.util.Random;
 
