@@ -122,10 +122,10 @@ public class Sheduler implements Runnable {
                 boolean commit = checkConflicts(nextTx);
                 timestamp.updateStartTS(nextTx.getCommitTS());
 
-                /*
+
                 if (!commit)
                     abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
-                    */
+
 
                 //reply to the Client
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());
