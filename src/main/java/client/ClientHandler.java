@@ -38,13 +38,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<MessageEvent> {
 
 
     public MessageEvent sendEvent(MessageEvent e){
-
-        if (e instanceof RollbackDone) {
-            ctx.writeAndFlush(e);
-            return null;
-        }
-
         final ResponseFuture responseFuture = new ResponseFuture();
+
+
         responses.put(e.getEventId(), responseFuture);
 
         ctx.writeAndFlush(e);

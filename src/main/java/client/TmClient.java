@@ -12,7 +12,6 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import messages.BeginReply;
 import messages.MessageEvent;
-import messages.RollbackDone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,10 +74,5 @@ public class TmClient {
 
     public boolean commit(long id, Set<? extends CellId> cells){
         return handler.sendCommitRequest(id, cells).isCommit();
-    }
-
-    public void rollbackDone(long transactionId) {
-        RollbackDone msg = new RollbackDone(transactionId);
-        handler.sendEvent(msg);
     }
 }
