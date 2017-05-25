@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
 
     <groupId>pt.haslab.tm</groupId>
-    <artifactId>tm-ajjits</artifactId>
+    <artifactId>tm-ajitts</artifactId>
     <version>0.1</version>
     <build>
         <plugins>
@@ -25,6 +25,9 @@
     <properties>
         <hbase0.version>0.98.10.1-hadoop1</hbase0.version>
         <hbase1.version>1.1.1</hbase1.version>
+
+        <slf4j.version>1.7.7</slf4j.version>
+        <log4j.version>1.2.17</log4j.version>
     </properties>
 
 
@@ -41,6 +44,29 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.9.Final</version>
         </dependency>
+
+
+
+
+
+
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+
     </dependencies>
 
 

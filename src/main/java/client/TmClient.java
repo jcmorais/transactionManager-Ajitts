@@ -1,6 +1,7 @@
 package client;
 
 import hbase.CellId;
+import hbase.HBaseTransactionManager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -11,6 +12,8 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import messages.BeginReply;
 import messages.MessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.util.Random;
@@ -20,6 +23,7 @@ import java.util.Set;
  * Created by carlosmorais on 24/04/2017.
  */
 public class TmClient {
+    private static final Logger LOG = LoggerFactory.getLogger(TmClient.class);
 
     static final boolean SSL = System.getProperty("ssl") != null;
     static final String HOST = System.getProperty("host", "192.168.112.57");

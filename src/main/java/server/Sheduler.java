@@ -27,7 +27,7 @@ public class Sheduler implements Runnable {
 
     Map<Long, Transaction> transactionMap;
 
-    Set<Long> abortedTransactions; // Transactions that were aborted, but the rollback has not yet been confirmed
+    AbortedTransactions abortedTransactions;
 
     private final CommitHashMap hashmap;
 
@@ -37,13 +37,14 @@ public class Sheduler implements Runnable {
         this.timestamp = new TimestampImpl();
         this.transactionMap = new ConcurrentHashMap<>();
         this.hashmap = new CommitHashMap(10000000);
-        this.abortedTransactions = new HashSet<>();
+        this.abortedTransactions = new AbortedTransactions();
     }
 
 
 
 
     public void startTransaction(BeginRequest event, Channel channel){
+        LOG.debug("event={} request to start a new transaction", event.getEventId());
         Transaction t = new Transaction(this, channel);
         synchronized (queue){
             t.setCommitTS(timestamp.nextCommitTS());
@@ -61,10 +62,14 @@ public class Sheduler implements Runnable {
         }
         */
         t.setStartTS(timestamp.getStartTS());
-        BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId(), abortedTransactions);
-        channel.writeAndFlush(reply);
+        BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId(), abortedTransactions.getAbortedTransactions());
+        try {
+            channel.writeAndFlush(reply).sync();
+        } catch (InterruptedException e) {
+            System.out.println("FODEU "+t.getCommitTS());
+        }
 
-        LOG.debug("Start a new transaction startTS={} commitTS={}", t.getStartTS(), t.getCommitTS());
+        LOG.debug("event={} start a new transaction: startTS={} commitTS={}", event.getEventId(), t.getStartTS(), t.getCommitTS());
     }
 
     public void commitTransaction(CommitRequest event){
@@ -99,6 +104,7 @@ public class Sheduler implements Runnable {
                     hashmap.putLatestWriteForCell(r, commitTS);
             }
         }
+        LOG.debug("transaction={} commit={}",tx.getCommitTS(), txCanCommit);
         return txCanCommit;
     }
 
@@ -118,7 +124,7 @@ public class Sheduler implements Runnable {
                 timestamp.updateStartTS(nextTx.getCommitTS());
 
                 if (!commit)
-                    abortedTransactions.add(nextTx.getCommitTS());
+                    abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
 
                 //reply to the Client
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());

@@ -9,6 +9,8 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -20,6 +22,8 @@ public class Server {
 
     static final boolean SSL = System.getProperty("ssl") != null;
     static final int PORT = Integer.parseInt(System.getProperty("port", "8322"));
+
+    private static final Logger LOG = LoggerFactory.getLogger(Sheduler.class);
 
     public static void main(String[] args) throws Exception {
         // Configure SSL.
@@ -43,7 +47,7 @@ public class Server {
             b.bind(PORT).sync().channel().closeFuture().sync();
             //b.bind("0.0.0.0", 655).channel().closeFuture().sync();
 
-            System.out.println(b.toString());
+            LOG.info(b.toString());
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

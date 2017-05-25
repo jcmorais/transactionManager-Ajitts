@@ -1,9 +1,12 @@
 package client;
 
 import hbase.CellId;
+import hbase.HBaseTransactionManager;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import messages.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -12,6 +15,7 @@ import java.util.concurrent.*;
  * Created by carlosmorais on 14/04/2017.
  */
 public class ClientHandler extends SimpleChannelInboundHandler<MessageEvent> {
+    private static final Logger LOG = LoggerFactory.getLogger(ClientHandler.class);
     private ChannelHandlerContext ctx;
     final BlockingQueue<MessageEvent> answer = new LinkedBlockingQueue<MessageEvent>();
     ConcurrentHashMap<String, BlockingQueue<MessageEvent>> promises = new ConcurrentHashMap<>();

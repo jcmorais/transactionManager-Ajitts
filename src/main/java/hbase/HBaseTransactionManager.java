@@ -2,6 +2,9 @@ package hbase;
 
 import client.TmClient;
 import messages.BeginReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import server.Sheduler;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -10,6 +13,7 @@ import java.util.HashSet;
  * Created by carlosmorais on 12/04/2017.
  */
 public class HBaseTransactionManager {
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseTransactionManager.class);
 
     private TmClient tmClient;
 
@@ -19,6 +23,7 @@ public class HBaseTransactionManager {
 
     public Transaction begin() {
         BeginReply reply = tmClient.begin();
+        LOG.debug("Trasaction={} begin done", reply.getCommitTimestamp());
         Transaction t = new HBaseTransaction(
                 reply.getStartTimestamp(),
                 reply.getCommitTimestamp(),
@@ -29,11 +34,15 @@ public class HBaseTransactionManager {
     }
 
     public void commit(Transaction t) throws RollbackException, IOException {
+        LOG.debug("Trasaction={} try to commit", t.getTransactionId());
         HBaseTransaction tx = (HBaseTransaction) t;
         tx.flushTables();
-        if(tmClient.commit(t.getTransactionId(), tx.getWriteSet()))
+        if(tmClient.commit(t.getTransactionId(), tx.getWriteSet())) {
+            LOG.debug("Trasaction={} commit done", t.getTransactionId());
             return;
+        }
         else{
+            LOG.debug("Trasaction={} abort, need to rollback", t.getTransactionId());
             rollback(t);
             throw new RollbackException("conflicts detected in transaction writeset");
         }
@@ -48,6 +57,7 @@ public class HBaseTransactionManager {
 
         //rollback the transaction
         tx.cleanup();
+        LOG.debug("Trasaction={} rollback done", transaction.getTransactionId());
 
     }
 }
