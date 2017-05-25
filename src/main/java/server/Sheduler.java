@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -30,6 +31,8 @@ public class Sheduler implements Runnable {
     AbortedTransactions abortedTransactions;
 
     private final CommitHashMap hashmap;
+
+    Set<Long> testSet = new TreeSet<>();
 
 
     public Sheduler() {
@@ -119,8 +122,10 @@ public class Sheduler implements Runnable {
                 boolean commit = checkConflicts(nextTx);
                 timestamp.updateStartTS(nextTx.getCommitTS());
 
+
                 if (!commit)
                     abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
+
 
                 //reply to the Client
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());
