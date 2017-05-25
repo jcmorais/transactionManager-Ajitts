@@ -27,8 +27,8 @@ public class TmClient {
     private static final Logger LOG = LoggerFactory.getLogger(TmClient.class);
 
     static final boolean SSL = System.getProperty("ssl") != null;
-    //static final String HOST = System.getProperty("host", "192.168.112.57");
-    static final String HOST = System.getProperty("host", "127.0.0.1");
+    static final String HOST = System.getProperty("host", "192.168.112.57");
+    //static final String HOST = System.getProperty("host", "127.0.0.1");
     static final int PORT = Integer.parseInt(System.getProperty("port", "8322"));
 
     private ClientHandler handler = new ClientHandler();
