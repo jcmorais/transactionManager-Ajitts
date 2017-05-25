@@ -2,6 +2,7 @@ package server;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -10,49 +11,34 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AbortedTransactions {
 
-    private Set<Long> abortedTransactions; // Transactions that were aborted, but the rollback has not yet been confirmed
+    //private Set<Long> abortedTransactions; // Transactions that were aborted, but the rollback has not yet been confirmed
 
+    private ConcurrentSkipListSet<Long> abortedTransactions;
 
     // TODO: 24/05/2017 use red/write lock
     private Lock lock;
 
 
     public AbortedTransactions() {
-        this.abortedTransactions = new HashSet<>();
+        this.abortedTransactions = new ConcurrentSkipListSet<>();
         this.lock = new ReentrantLock();
     }
 
     public Set<Long> getAbortedTransactions() {
         Set<Long> res = new HashSet<>();
-        try {
-            lock.lock();
-            for (Long abortedTransaction : abortedTransactions) {
-                res.add(abortedTransaction);
-            }
-        }
-        finally {
-            lock.unlock();
-        }
+
+        for (Long abortedTransaction : abortedTransactions)
+            res.add(abortedTransaction);
+
         return res;
     }
 
     public void addAbortedTransaction(long id) {
-        try {
-            lock.lock();
-            this.abortedTransactions.add(id);
-        }
-        finally {
-            lock.unlock();
-        }
+        this.abortedTransactions.add(id);
     }
 
     public void setAbortedTransaction(long id) {
-        try {
-            lock.lock();
-            this.abortedTransactions.remove(id);
-        }
-        finally {
-            lock.unlock();
-        }
+        this.abortedTransactions.remove(id);
+
     }
 }
