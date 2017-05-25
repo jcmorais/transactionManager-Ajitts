@@ -32,9 +32,6 @@ public class Sheduler implements Runnable {
 
     private final CommitHashMap hashmap;
 
-    Set<Long> testSet = new TreeSet<>();
-
-
     public Sheduler() {
         this.queue = new LinkedBlockingDeque<>();
         this.timestamp = new TimestampImpl();

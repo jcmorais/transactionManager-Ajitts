@@ -23,13 +23,15 @@ public class HBaseTransactionManager {
 
     public Transaction begin() {
         BeginReply reply = tmClient.begin();
-        LOG.debug("Trasaction={} begin done", reply.getCommitTimestamp());
+
         Transaction t = new HBaseTransaction(
                 reply.getStartTimestamp(),
                 reply.getCommitTimestamp(),
                 new HashSet<>(),
                 this,
                 reply.getAbortedTransactions());
+
+        LOG.debug("Trasaction={} begin; abortedTx={}", t.getTransactionId(), ((HBaseTransaction )t).getAbortedTransactions());
         return t;
     }
 

@@ -14,18 +14,12 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AbortedTransactions {
     private static final Logger LOG = LoggerFactory.getLogger(AbortedTransactions.class);
-    //private Set<Long> abortedTransactions; // Transactions that were aborted, but the rollback has not yet been confirmed
 
-    private ConcurrentSkipListSet<Long> abortedTransactions;
-
-
-    // TODO: 24/05/2017 use red/write lock
-    private Lock lock;
+    private ConcurrentSkipListSet<Long> abortedTransactions; // Transactions that were aborted, but the rollback has not yet been confirmed
 
 
     public AbortedTransactions() {
         this.abortedTransactions = new ConcurrentSkipListSet<>();
-        this.lock = new ReentrantLock();
     }
 
     public Set<Long> getAbortedTransactions() {
