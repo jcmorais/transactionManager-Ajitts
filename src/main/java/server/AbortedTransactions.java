@@ -25,12 +25,7 @@ public class AbortedTransactions {
     }
 
     public Set<Long> getAbortedTransactions() {
-        Set<Long> res = new HashSet<>();
-
-        for (Long abortedTransaction : abortedTransactions)
-            res.add(abortedTransaction);
-
-        return res;
+        return abortedTransactions;
     }
 
     public void addAbortedTransaction(long id) {
