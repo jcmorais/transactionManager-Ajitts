@@ -50,6 +50,7 @@ public class TTable implements Closeable {
 
     public Result get(Transaction tx, final Get get) throws IOException {
 
+        LOG.info("start Get: {}", get);
 
         HBaseTransaction transaction = (HBaseTransaction) tx;
 
@@ -73,32 +74,61 @@ public class TTable implements Closeable {
                 }
             }
         }
-        LOG.info("Initial Get = {}", tsget);
+        LOG.info("TxGet = {}", tsget);
 
         // Return the KVs that belong to the transaction snapshot, ask for more
         // versions if needed
         Result result = table.get(tsget);
+        LOG.info("Initial Result: {}", result);
         List<Cell> filteredKeyValues = Collections.emptyList();
         if (!result.isEmpty()) {
             filteredKeyValues = filterCellsForSnapshot(result.listCells(), transaction, tsget.getMaxVersions());
         }
 
-        return Result.create(filteredKeyValues);
+        Result res = Result.create(filteredKeyValues);
+        LOG.info("Final Result: {}", res);
+        return res;
     }
 
-    List<Cell> filterCellsForSnapshot(List<Cell> rawCells, HBaseTransaction transaction, int versionsToRequest){
+    List<Cell> filterCellsForSnapshot(List<Cell> rawCells, HBaseTransaction transaction, int versionsToRequest) throws IOException {
 
         assert (rawCells != null && transaction != null && versionsToRequest >= 1);
 
-        Set<Long> aborts = transaction.getAbortedTransactions();
+        LOG.info("filter cells for SI: {}", rawCells);
 
-        for (Cell rawCell : rawCells) {
-            if ( aborts.contains(rawCell.getTimestamp() ) ){
-                LOG.info("Found a shitt cell, tx={} ", rawCell.getTimestamp());
+        Set<Long> aborts = transaction.getAbortedTransactions();
+        LOG.info("abortedList: {}", aborts);
+
+        List<Cell> cellsInSI = new ArrayList<>();
+        List<Get> pendingGets = new ArrayList<>();
+
+        for (Cell cell : rawCells) {
+            if ( aborts.contains(cell.getTimestamp() ) ){
+                LOG.info("Found a shitt cell, tx={} ", cell.getTimestamp());
+                Get g = new Get(CellUtil.cloneRow(cell));
+                g.addColumn(CellUtil.cloneFamily(cell), CellUtil.cloneQualifier(cell));
+                g.setTimeRange(0, cell.getTimestamp());
+                pendingGets.add(g);
+            }
+            else
+                cellsInSI.add(cell);
+        }
+
+        LOG.info("cells in SI: {}", cellsInSI);
+        LOG.info("pending Get's: {}", pendingGets);
+
+        if ( !pendingGets.isEmpty() ){
+            Result[] pendingGetsResults = table.get(pendingGets);
+            for (Result pendingGetResult : pendingGetsResults) {
+                if (!pendingGetResult.isEmpty()) {
+                    cellsInSI.addAll(filterCellsForSnapshot(pendingGetResult.listCells(), transaction, versionsToRequest));
+                }
             }
         }
 
-        return rawCells;
+        LOG.info("filtered cells: {}", cellsInSI);
+
+        return cellsInSI;
 
     }
 
