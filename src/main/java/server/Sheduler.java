@@ -63,11 +63,7 @@ public class Sheduler implements Runnable {
         */
         t.setStartTS(timestamp.getStartTS());
         BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId(), abortedTransactions.getAbortedTransactions());
-        try {
-            channel.writeAndFlush(reply).sync();
-        } catch (InterruptedException e) {
-            System.out.println("FODEU "+t.getCommitTS());
-        }
+        channel.writeAndFlush(reply);
 
         LOG.debug("event={} start a new transaction: startTS={} commitTS={}", event.getEventId(), t.getStartTS(), t.getCommitTS());
     }
