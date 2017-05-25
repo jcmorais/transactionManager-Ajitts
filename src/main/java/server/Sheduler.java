@@ -65,7 +65,7 @@ public class Sheduler implements Runnable {
         }
         */
         t.setStartTS(timestamp.getStartTS());
-        BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId(), testSet);
+        BeginReply reply = new BeginReply(t.getStartTS(), t.getCommitTS(), event.getEventId(), abortedTransactions.getAbortedTransactions());
         channel.writeAndFlush(reply);
 
         LOG.debug("event={} start a new transaction: startTS={} commitTS={}", event.getEventId(), t.getStartTS(), t.getCommitTS());

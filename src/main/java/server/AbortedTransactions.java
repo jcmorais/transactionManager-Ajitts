@@ -29,7 +29,7 @@ public class AbortedTransactions {
     }
 
     public Set<Long> getAbortedTransactions() {
-        return abortedTransactions;
+        return abortedTransactions.clone();
     }
 
     public void addAbortedTransaction(long id) {
