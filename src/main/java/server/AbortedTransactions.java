@@ -37,7 +37,7 @@ public class AbortedTransactions {
         this.abortedTransactions.add(id);
     }
 
-    public void setAbortedTransaction(long id) {
+    public void removeTransaction(long id) {
         this.abortedTransactions.remove(id);
 
     }

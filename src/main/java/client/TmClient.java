@@ -12,6 +12,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import messages.BeginReply;
 import messages.MessageEvent;
+import messages.RollbackDone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,8 @@ public class TmClient {
     private static final Logger LOG = LoggerFactory.getLogger(TmClient.class);
 
     static final boolean SSL = System.getProperty("ssl") != null;
-    static final String HOST = System.getProperty("host", "192.168.112.57");
-    //static final String HOST = System.getProperty("host", "127.0.0.1");
+    //static final String HOST = System.getProperty("host", "192.168.112.57");
+    static final String HOST = System.getProperty("host", "127.0.0.1");
     static final int PORT = Integer.parseInt(System.getProperty("port", "8322"));
 
     private ClientHandler handler = new ClientHandler();
@@ -74,5 +75,10 @@ public class TmClient {
 
     public boolean commit(long id, Set<? extends CellId> cells){
         return handler.sendCommitRequest(id, cells).isCommit();
+    }
+
+    public void rollbackDone(long transactionId) {
+        RollbackDone msg = new RollbackDone(transactionId);
+        handler.sendEvent(msg);
     }
 }
