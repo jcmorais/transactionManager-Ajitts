@@ -90,6 +90,31 @@ public class TTable implements Closeable {
         return res;
     }
 
+
+    public ResultScanner getScanner(Transaction tx, Scan scan) throws IOException {
+
+        HBaseTransaction transaction = (HBaseTransaction) tx;
+
+        Scan tsscan = new Scan(scan);
+        tsscan.setMaxVersions(1);
+        tsscan.setTimeRange(0, transaction.getStartTimestamp() + 1);
+        Map<byte[], NavigableSet<byte[]>> kvs = scan.getFamilyMap();
+        for (Map.Entry<byte[], NavigableSet<byte[]>> entry : kvs.entrySet()) {
+            byte[] family = entry.getKey();
+            NavigableSet<byte[]> qualifiers = entry.getValue();
+            if (qualifiers == null) {
+                continue;
+            }
+            for (byte[] qualifier : qualifiers) {
+                tsscan.addColumn(family, qualifier);
+            }
+        }
+
+        return new TransactionalClientScanner(transaction, tsscan, 1);
+    }
+
+
+
     List<Cell> filterCellsForSnapshot(List<Cell> rawCells, HBaseTransaction transaction, int versionsToRequest) throws IOException {
 
         assert (rawCells != null && transaction != null && versionsToRequest >= 1);
@@ -244,6 +269,108 @@ public class TTable implements Closeable {
 
     public void flushCommits() throws IOException {
         table.flushCommits();
+    }
+
+
+
+    protected class TransactionalClientScanner implements ResultScanner {
+
+        private HBaseTransaction state;
+        private ResultScanner innerScanner;
+        private int maxVersions;
+
+        TransactionalClientScanner(HBaseTransaction state, Scan scan, int maxVersions)
+                throws IOException {
+            this.state = state;
+            this.innerScanner = table.getScanner(scan);
+            this.maxVersions = maxVersions;
+        }
+
+
+        @Override
+        public Result next() throws IOException {
+            List<Cell> filteredResult = Collections.emptyList();
+            while (filteredResult.isEmpty()) {
+                Result result = innerScanner.next();
+                if (result == null) {
+                    return null;
+                }
+                if (!result.isEmpty()) {
+                    filteredResult = filterCellsForSnapshot(result.listCells(), state, maxVersions);
+                }
+            }
+            return Result.create(filteredResult);
+        }
+
+        // In principle no need to override, copied from super.next(int) to make
+        // sure it works even if super.next(int)
+        // changes its implementation
+        @Override
+        public Result[] next(int nbRows) throws IOException {
+            // Collect values to be returned here
+            ArrayList<Result> resultSets = new ArrayList<>(nbRows);
+            for (int i = 0; i < nbRows; i++) {
+                Result next = next();
+                if (next != null) {
+                    resultSets.add(next);
+                } else {
+                    break;
+                }
+            }
+            return resultSets.toArray(new Result[resultSets.size()]);
+        }
+
+        @Override
+        public void close() {
+            innerScanner.close();
+        }
+
+        @Override
+        public Iterator<Result> iterator() {
+            return new ResultIterator(this);
+        }
+
+        // ------------------------------------------------------------------------------------------------------------
+        // --------------------------------- Helper class for TransactionalClientScanner ------------------------------
+        // ------------------------------------------------------------------------------------------------------------
+
+        class ResultIterator implements Iterator<Result> {
+
+            TransactionalClientScanner scanner;
+            Result currentResult;
+
+            ResultIterator(TransactionalClientScanner scanner) {
+                try {
+                    this.scanner = scanner;
+                    currentResult = scanner.next();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public boolean hasNext() {
+                return currentResult != null && !currentResult.isEmpty();
+            }
+
+            @Override
+            public Result next() {
+                try {
+                    Result result = currentResult;
+                    currentResult = scanner.next();
+                    return result;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void remove() {
+                throw new RuntimeException("Not implemented");
+            }
+
+        }
+
     }
 
 
