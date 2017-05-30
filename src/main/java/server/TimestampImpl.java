@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Created by carlosmorais on 12/04/2017.
@@ -16,13 +17,13 @@ public class  TimestampImpl implements Timestamp{
     private long startTimestamp;
     private long commitTimestamp;
 
-    private Set<Long> pendingStarts;
+    private ConcurrentSkipListSet<Long> pendingStarts;
 
 
     public TimestampImpl() {
         this.startTimestamp = 0;
         this.commitTimestamp = 0;
-        this.pendingStarts = new HashSet<>();
+        this.pendingStarts = new ConcurrentSkipListSet<>();
     }
 
 
