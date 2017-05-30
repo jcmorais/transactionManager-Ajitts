@@ -51,14 +51,22 @@ public class Test2 {
             System.out.println("Abort: "+e.getMessage());
         }
 
-        try {
-            tm.commit(tx2);
-            System.out.println("comitted");
-        } catch (RollbackException e) {
-            System.out.println("Abort: "+e.getMessage());
-        }
+        Runnable task =  () -> {
+            try {
+                try {
+                    tm.commit(tx2);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("comitted");
+            } catch (RollbackException e) {
+                System.out.println("Abort: " + e.getMessage());
+            }
+        };
 
-
+        Thread thread = new Thread(task);
+        thread.start();
+        Thread.sleep(200);
 
         Transaction tx3 = tm.begin();
         Get get = new Get(Bytes.toBytes("qwerty"));
@@ -73,11 +81,8 @@ public class Test2 {
 
 
 
-
-
-
-
-
+        thread.join();
+        Thread.sleep(1000);
         System.exit(0);
 
     }

@@ -58,6 +58,15 @@ public class HBaseTransactionManager {
         tx.setStatus(Transaction.Status.ROLLEDBACK);
 
         //rollback the transaction
+
+        /*
+        //use this to test
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        */
         tx.cleanup();
         tmClient.rollbackDone(transaction.getTransactionId());
         LOG.debug("Trasaction={} rollback done", transaction.getTransactionId());

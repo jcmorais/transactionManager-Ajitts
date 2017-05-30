@@ -24,7 +24,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<MessageEvent> {
             sheduler.commitTransaction((CommitRequest) msg);
         }
         else if (msg instanceof RollbackDone){
-            sheduler.abortedTransactions.removeTransaction(((RollbackDone) msg).getId());
+            //sheduler.abortedTransactions.removeTransaction(((RollbackDone) msg).getId());
+            sheduler.timestamp.updateStartTS(((RollbackDone) msg).getId());
         }
     }
 }

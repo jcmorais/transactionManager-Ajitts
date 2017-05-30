@@ -24,7 +24,7 @@ public class Sheduler implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(Sheduler.class);
 
     BlockingDeque<Transaction> queue;
-    private Timestamp timestamp;
+    Timestamp timestamp;
 
     Map<Long, Transaction> transactionMap;
 
@@ -117,18 +117,16 @@ public class Sheduler implements Runnable {
 
                 //Deteção de conflitos
                 boolean commit = checkConflicts(nextTx);
-                timestamp.updateStartTS(nextTx.getCommitTS());
+                if (commit)
+                    timestamp.updateStartTS(nextTx.getCommitTS());
 
-
-                if (!commit)
-                    abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
-
+                //if (!commit) abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
 
                 //reply to the Client
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());
 
                 nextTx.getChannel().writeAndFlush(reply);
-                LOG.debug("Done {}", nextTx.getCommitTS());
+                LOG.debug("Done {}, commit={}", nextTx.getCommitTS(), commit);
 
                 transactionMap.remove(nextTx.getCommitTS());
             } catch (InterruptedException e) {
