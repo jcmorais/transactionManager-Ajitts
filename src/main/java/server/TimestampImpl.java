@@ -26,20 +26,17 @@ public class  TimestampImpl implements Timestamp{
 
 
     public synchronized void updateStartTS(long commitTS){
-        LOG.info("update startTS with {}, current={}", commitTS, startTimestamp);
+        LOG.debug("update startTS with {}, current={}", commitTS, startTimestamp);
         if (startTimestamp == (commitTS-1)) {
             startTimestamp = commitTS;
             updatePendings();
         }
-        else  {
-            LOG.info("add "+commitTS+" to "+pendingStarts);
+        else
             pendingStarts.add(commitTS);
-            LOG.info("so pendings "+pendingStarts);
-        }
     }
 
     public void updatePendings(){
-        LOG.info("update pendings; startTS={}, pendings={}", startTimestamp, pendingStarts);
+        LOG.debug("update pendings; startTS={}, pendings={}", startTimestamp, pendingStarts);
         Iterator<Long> it = pendingStarts.iterator();
         boolean flag = true;
         while (it.hasNext() && flag){
