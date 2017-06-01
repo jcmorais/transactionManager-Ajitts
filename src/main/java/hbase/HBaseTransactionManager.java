@@ -44,6 +44,7 @@ public class HBaseTransactionManager {
             ((HBaseTransaction) t).flushPuts();
             tx.flushTables();
             //Now, the transaction is done!
+            tmClient.writesDone(((HBaseTransaction) t).getCommitTimestamp());
             return;
         }
         else{

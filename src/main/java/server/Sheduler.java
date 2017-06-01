@@ -120,10 +120,10 @@ public class Sheduler implements Runnable {
 
                 //Deteção de conflitos
                 boolean commit = checkConflicts(nextTx);
-                timestamp.updateStartTS(nextTx.getCommitTS());
+                //timestamp.updateStartTS(nextTx.getCommitTS());
 
 
-                if (commit)
+                if (!commit)
                     timestamp.updateStartTS(nextTx.getCommitTS());
 
                 //if (!commit) abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());

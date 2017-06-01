@@ -13,6 +13,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import messages.BeginReply;
 import messages.MessageEvent;
 import messages.RollbackDone;
+import messages.WritesDone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +80,11 @@ public class TmClient {
 
     public void rollbackDone(long transactionId) {
         RollbackDone msg = new RollbackDone(transactionId);
+        handler.sendEvent(msg);
+    }
+
+    public void writesDone(long commitTimestamp) {
+        WritesDone msg = new WritesDone(commitTimestamp);
         handler.sendEvent(msg);
     }
 }

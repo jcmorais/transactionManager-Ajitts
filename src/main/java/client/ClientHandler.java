@@ -43,6 +43,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<MessageEvent> {
             ctx.writeAndFlush(e);
             return null;
         }
+        else if (e instanceof WritesDone) {
+            ctx.writeAndFlush(e);
+            return null;
+        }
 
         final ResponseFuture responseFuture = new ResponseFuture();
         responses.put(e.getEventId(), responseFuture);
