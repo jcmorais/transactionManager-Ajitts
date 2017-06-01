@@ -16,12 +16,13 @@ import server.Sheduler;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Created by carlosmorais on 09/05/2017.
  */
-public class TTable implements Closeable {
+public class TTable implements Closeable, Serializable {
     private HTableInterface table;
     private static final Logger LOG = LoggerFactory.getLogger(TTable.class);
 
@@ -191,6 +192,7 @@ public class TTable implements Closeable {
                                 kv.getTimestamp()));
             }
         }
+
 
         ((HBaseTransaction) tx).addPut(this, tsput);
         //in this version we don't write to HBase until we have a commit confirmation
@@ -383,5 +385,8 @@ public class TTable implements Closeable {
 
     }
 
+    public String getTableName() {
+        return table.getName().getNameAsString();
+    }
 
 }

@@ -39,6 +39,10 @@ public class HBaseTransactionManager {
         LOG.debug("Trasaction={} try to commit", t.getTransactionId());
         HBaseTransaction tx = (HBaseTransaction) t;
         //tx.flushTables();
+
+        //selrialize de writeset
+        tx.serialize();
+
         if(tmClient.commit(t.getTransactionId(), tx.getWriteSet())) {
             LOG.debug("Trasaction={} commit done; need to flush puts", t.getTransactionId());
             ((HBaseTransaction) t).flushPuts();

@@ -23,7 +23,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
@@ -36,6 +36,27 @@ public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
                      Set<Long> abortedTransactions) {
         super(startTS, commitTS, writeSet, tm, abortedTransactions);
         this.puts = new HashMap<>();
+    }
+
+
+    public void serialize() throws IOException {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<TTable, List<Put>> table : puts.entrySet()) {
+            sb.append("{\"table\":"+table.getKey().getTableName()+",");
+            sb.append("\"puts\":{");
+            for (Put put : table.getValue()) {
+                sb.append(put.toJSON());
+            }
+            sb.append("}}");
+        }
+
+        FileOutputStream fos = null;
+        fos = new FileOutputStream("logs/"+getCommitTimestamp());
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(sb.toString());
+        oos.close();
     }
 
     
