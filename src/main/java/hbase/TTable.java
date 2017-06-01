@@ -90,6 +90,14 @@ public class TTable implements Closeable {
         return res;
     }
 
+    public void flushPuts(List<Put> puts){
+        try {
+            table.put(puts);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public ResultScanner getScanner(Transaction tx, Scan scan) throws IOException {
 
@@ -184,7 +192,9 @@ public class TTable implements Closeable {
             }
         }
 
-        table.put(tsput);
+        ((HBaseTransaction) tx).addPut(this, tsput);
+        //in this version we don't write to HBase until we have a commit confirmation
+        //table.put(tsput);
     }
 
 

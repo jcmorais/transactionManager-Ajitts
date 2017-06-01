@@ -30,7 +30,7 @@ public class Test2 {
 
         TTable t = new TTable("MY_TEST");
 
-        Put put = new Put(Bytes.toBytes("qwerty"));
+        Put put = new Put(Bytes.toBytes("chupachupa"));
         put.add(family, qualifier1, Bytes.toBytes(10));
 
         t.put(tx, put);
@@ -39,19 +39,24 @@ public class Test2 {
 
         TTable t2 = new TTable("MY_TEST");
 
-        Put put2 = new Put(Bytes.toBytes("qwerty"));
+        Put put2 = new Put(Bytes.toBytes("chupachupa"));
         put2.add(family, qualifier1, Bytes.toBytes(11));
 
         t2.put(tx2, put2);
 
+        System.out.println("puts done...");
+
         try {
+            Thread.sleep(5000);
             tm.commit(tx);
             System.out.println("comitted");
+            Thread.sleep(5000);
         } catch (RollbackException e) {
             System.out.println("Abort: "+e.getMessage());
         }
 
         try {
+            Thread.sleep(5000);
             tm.commit(tx2);
             System.out.println("comitted");
         } catch (RollbackException e) {
@@ -59,6 +64,8 @@ public class Test2 {
         }
 
 
+
+        /**
 
         Transaction tx3 = tm.begin();
         Get get = new Get(Bytes.toBytes("qwerty"));
@@ -72,7 +79,7 @@ public class Test2 {
         }
 
 
-
+*/
 
 
 

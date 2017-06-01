@@ -38,9 +38,12 @@ public class HBaseTransactionManager {
     public void commit(Transaction t) throws RollbackException, IOException {
         LOG.debug("Trasaction={} try to commit", t.getTransactionId());
         HBaseTransaction tx = (HBaseTransaction) t;
-        tx.flushTables();
+        //tx.flushTables();
         if(tmClient.commit(t.getTransactionId(), tx.getWriteSet())) {
-            LOG.debug("Trasaction={} commit done", t.getTransactionId());
+            LOG.debug("Trasaction={} commit done; need to flush puts", t.getTransactionId());
+            ((HBaseTransaction) t).flushPuts();
+            tx.flushTables();
+            //Now, the transaction is done!
             return;
         }
         else{

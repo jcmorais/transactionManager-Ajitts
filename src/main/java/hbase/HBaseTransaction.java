@@ -19,21 +19,34 @@ package hbase;
 
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.Put;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
     private static final Logger LOG = LoggerFactory.getLogger(HBaseTransaction.class);
+    
+    
+    private Map<TTable, List<Put>> puts;
 
     HBaseTransaction(long startTS, long commitTS, Set<HBaseCellId> writeSet, HBaseTransactionManager tm,
                      Set<Long> abortedTransactions) {
         super(startTS, commitTS, writeSet, tm, abortedTransactions);
+        this.puts = new HashMap<>();
     }
 
+    
+    public void addPut(TTable tTable, Put put){
+        if (! puts.containsKey(tTable))
+            puts.put(tTable, new ArrayList<>());
+
+        puts.get(tTable).add(put);
+    }
+    
+    
     @Override
     public void cleanup() {
         Set<HBaseCellId> writeSet = getWriteSet();
@@ -52,6 +65,15 @@ public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
             LOG.warn("Failed flushing tables for Tx {}", getTransactionId(), e);
         }
     }
+    
+    
+    public void flushPuts(){
+        for (TTable tTable : puts.keySet()) {
+            tTable.flushPuts(puts.get(tTable));
+        }
+    }
+    
+    
 
     /**
      * Flushes pending operations for tables touched by transaction

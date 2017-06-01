@@ -24,7 +24,7 @@ public class Sheduler implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(Sheduler.class);
 
     BlockingDeque<Transaction> queue;
-    private Timestamp timestamp;
+    Timestamp timestamp;
 
     Map<Long, Transaction> transactionMap;
 
@@ -104,6 +104,9 @@ public class Sheduler implements Runnable {
         return txCanCommit;
     }
 
+    public void writesDone(Long id) {
+
+    }
 
     @Override
     public void run() {
@@ -120,8 +123,10 @@ public class Sheduler implements Runnable {
                 timestamp.updateStartTS(nextTx.getCommitTS());
 
 
-                if (!commit)
-                    abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
+                if (commit)
+                    timestamp.updateStartTS(nextTx.getCommitTS());
+
+                //if (!commit) abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
 
 
                 //reply to the Client
@@ -138,6 +143,5 @@ public class Sheduler implements Runnable {
 
 
     }
-
 
 }

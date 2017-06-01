@@ -23,8 +23,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<MessageEvent> {
         else if( msg instanceof CommitRequest){
             sheduler.commitTransaction((CommitRequest) msg);
         }
-        else if (msg instanceof RollbackDone){
-            sheduler.abortedTransactions.removeTransaction(((RollbackDone) msg).getId());
+        else if (msg instanceof WritesDone){
+            sheduler.timestamp.updateStartTS(((WritesDone) msg).getId());
         }
     }
 }
