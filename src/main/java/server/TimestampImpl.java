@@ -48,7 +48,7 @@ public class  TimestampImpl implements Timestamp{
     }
 
     public void updatePendings(){
-        LOG.info("update pendings; startTS={}, pendings={}", startTimestamp, pendingStarts);
+        LOG.debug("update pendings; startTS={}, pendings={}", startTimestamp, pendingStarts);
         Iterator<Long> it = pendingStarts.iterator();
         while (it.hasNext()){
             long current = it.next();
