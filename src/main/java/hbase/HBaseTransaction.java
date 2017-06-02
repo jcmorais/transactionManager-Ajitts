@@ -40,6 +40,7 @@ public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
 
 
     public void serialize() throws IOException {
+        new File(System.getProperty("user.dir")+"/logs/").mkdirs();
 
         StringBuilder sb = new StringBuilder();
 
@@ -53,7 +54,7 @@ public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
         }
 
         FileOutputStream fos = null;
-        fos = new FileOutputStream("logs/"+getCommitTimestamp());
+        fos = new FileOutputStream(System.getProperty("user.dir")+"/logs/"+getCommitTimestamp());
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(sb.toString());
         oos.close();
