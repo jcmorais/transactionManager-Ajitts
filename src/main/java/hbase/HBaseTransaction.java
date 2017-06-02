@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
@@ -39,7 +41,7 @@ public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
     }
 
 
-    public void serialize() throws IOException {
+    public void wal() throws IOException {
         new File(System.getProperty("user.dir")+"/logs/").mkdirs();
 
         StringBuilder sb = new StringBuilder();
@@ -58,6 +60,14 @@ public class HBaseTransaction extends AbstractTransaction<HBaseCellId> {
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(sb.toString());
         oos.close();
+    }
+
+    public void deleteWal(){
+        try {
+            Files.deleteIfExists(Paths.get(System.getProperty("user.dir")+"/logs/"+getCommitTimestamp()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     

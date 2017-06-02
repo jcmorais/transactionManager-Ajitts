@@ -4,7 +4,6 @@ import client.TmClient;
 import messages.BeginReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import server.Sheduler;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -41,7 +40,7 @@ public class HBaseTransactionManager {
         //tx.flushTables();
 
         //selrialize de writeset
-        tx.serialize();
+        tx.wal();
 
         if(tmClient.commit(t.getTransactionId(), tx.getWriteSet())) {
             LOG.debug("Trasaction={} commit done; need to flush puts", t.getTransactionId());
@@ -49,6 +48,7 @@ public class HBaseTransactionManager {
             tx.flushTables();
             //Now, the transaction is done!
             tmClient.writesDone(((HBaseTransaction) t).getCommitTimestamp());
+            tx.deleteWal();
             return;
         }
         else{

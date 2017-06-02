@@ -23,6 +23,7 @@ public class Run {
 
 
         System.out.println(p.getAttributesMap());
+        p.getAttribute("sasasa");
         System.out.println(p.getFamilyCellMap().toString());
 
         System.out.println(p.getDurability().toString());
