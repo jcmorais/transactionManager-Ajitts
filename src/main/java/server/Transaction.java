@@ -1,5 +1,6 @@
 package server;
 
+import hbase.AbstractTransaction;
 import io.netty.channel.Channel;
 
 import java.util.List;
@@ -24,7 +25,12 @@ public class Transaction implements Runnable{
 
     private List<Long> cellsId;
 
+    private Status status;
 
+
+    enum Status {
+        RUNNING, COMMITTED, ROLLEDBACK
+    }
 
     public Transaction(Sheduler sheduler, Channel channel) {
         this.commitRequest = false;
@@ -32,6 +38,15 @@ public class Transaction implements Runnable{
         this.channel = channel;
         this.lock = new ReentrantLock();
         this.condition = lock.newCondition();
+        this.status = Status.RUNNING;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
 

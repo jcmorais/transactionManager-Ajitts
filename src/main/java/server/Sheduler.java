@@ -7,6 +7,7 @@ import messages.CommitReply;
 import messages.CommitRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.rmi.runtime.Log;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -71,6 +72,19 @@ public class Sheduler implements Runnable {
     public void commitTransaction(CommitRequest event){
         //Mark the transaction as ready to commit
         //Scheduler is responsible for responding to the client with the result
+
+        if (event.getCellId().size() == 0) {
+            //read-only
+            Transaction tx = transactionMap.get(event.getId());
+            tx.setStatus(Transaction.Status.COMMITTED);
+
+            //reply to the Client
+            CommitReply reply = new CommitReply(true, tx.getEventId());
+
+            tx.getChannel().writeAndFlush(reply);
+            LOG.debug("Tx {} is read-only. commited", tx.getCommitTS());
+        }
+
         transactionMap.get(event.getId()).setCommitRequest(event.getEventId(), event.getCellId());
     }
 
@@ -104,10 +118,6 @@ public class Sheduler implements Runnable {
         return txCanCommit;
     }
 
-    public void writesDone(Long id) {
-
-    }
-
     @Override
     public void run() {
 
@@ -118,16 +128,17 @@ public class Sheduler implements Runnable {
                 LOG.debug("Take (st={},cm={})",nextTx.getStartTS(), nextTx.getCommitTS());
                 nextTx.waitForCommitRequest();
 
+                if (nextTx.getStatus() != Transaction.Status.RUNNING) {
+                    timestamp.updateStartTS(nextTx.getCommitTS());
+                    LOG.debug("Done {}", nextTx.getCommitTS());
+                    continue;
+                }
+
                 //Deteção de conflitos
                 boolean commit = checkConflicts(nextTx);
-                //timestamp.updateStartTS(nextTx.getCommitTS());
-
 
                 if (!commit)
                     timestamp.updateStartTS(nextTx.getCommitTS());
-
-                //if (!commit) abortedTransactions.addAbortedTransaction(nextTx.getCommitTS());
-
 
                 //reply to the Client
                 CommitReply reply = new CommitReply(commit, nextTx.getEventId());
