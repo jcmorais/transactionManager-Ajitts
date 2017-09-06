@@ -79,8 +79,7 @@ public class Sheduler implements Runnable {
             tx.setStatus(Transaction.Status.COMMITTED);
 
             //reply to the Client
-            CommitReply reply = new CommitReply(true, tx.getEventId());
-
+            CommitReply reply = new CommitReply(true, event.getEventId());
             tx.getChannel().writeAndFlush(reply);
             LOG.debug("Tx {} is read-only. commited", tx.getCommitTS());
         }
@@ -152,7 +151,5 @@ public class Sheduler implements Runnable {
             }
         }
 
-
     }
-
 }
