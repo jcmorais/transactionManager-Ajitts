@@ -47,7 +47,9 @@ public class HBaseTransactionManager {
             ((HBaseTransaction) t).flushPuts();
             tx.flushTables();
             //Now, the transaction is done!
-            tmClient.writesDone(((HBaseTransaction) t).getCommitTimestamp());
+            //if is read-onnly don't need to confirm
+            if (tx.getWriteSet().size()>0)
+                tmClient.writesDone(((HBaseTransaction) t).getCommitTimestamp());
             tx.deleteWal();
             return;
         }

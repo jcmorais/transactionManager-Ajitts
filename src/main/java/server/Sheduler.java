@@ -130,20 +130,20 @@ public class Sheduler implements Runnable {
                 if (nextTx.getStatus() != Transaction.Status.RUNNING) {
                     timestamp.updateStartTS(nextTx.getCommitTS());
                     LOG.debug("Done {}", nextTx.getCommitTS());
-                    continue;
                 }
+                else {
+                    //Deteção de conflitos
+                    boolean commit = checkConflicts(nextTx);
 
-                //Deteção de conflitos
-                boolean commit = checkConflicts(nextTx);
+                    if (!commit)
+                        timestamp.updateStartTS(nextTx.getCommitTS());
 
-                if (!commit)
-                    timestamp.updateStartTS(nextTx.getCommitTS());
+                    //reply to the Client
+                    CommitReply reply = new CommitReply(commit, nextTx.getEventId());
 
-                //reply to the Client
-                CommitReply reply = new CommitReply(commit, nextTx.getEventId());
-
-                nextTx.getChannel().writeAndFlush(reply);
-                LOG.debug("Done {}", nextTx.getCommitTS());
+                    nextTx.getChannel().writeAndFlush(reply);
+                    LOG.debug("Done {}", nextTx.getCommitTS());
+                }
 
                 transactionMap.remove(nextTx.getCommitTS());
             } catch (InterruptedException e) {
